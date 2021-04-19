@@ -1,0 +1,173 @@
+SimpleNode one_line():
+{}
+{
+ "startprogram" inner() "endprogram"
+ {
+   return jjtThis;
+ }
+}
+void inner():
+{}
+{
+  "initializationblock:"  I_Block()
+}
+void I_Block():
+{}
+{
+ (
+    < Int> alpha() < semicolon >
+  | < tfloat> alpha2() < semicolon>
+ )*
+ C_Block()
+}
+void alpha():
+{
+  Token t;
+}
+{
+  var("int")
+  (
+    "="
+    t=< CONSTANT >
+    {
+      jjtThis.value = t.image;
+    }
+  )?  
+}
+void alpha2():
+{Token t;}
+{
+  var("float")
+  (
+    "="
+        t=< CONSTANT >
+    {
+      jjtThis.value = t.image;
+    }
+  )?  
+}
+void C_Block():
+{}
+{
+"codeblock:"
+< ifstart>
+if_cond()
+ "ifend"
+ Last_Block()
+}
+void if_cond():
+{}
+{
+f1() f2() f3()
+}
+void f1():
+{}
+{
+{     
+  jjtThis.value="iff";
+}  
+var("") ex() var("")
+}
+void ex():
+{}
+{
+  < GT>
+  {
+    jjtThis.value=">";
+  }
+| < LT>
+{
+  jjtThis.value="<";
+}
+}
+void f2():
+{}
+{
+var("") "=" var("") opr() var("") < semicolon>
+}
+void opr():
+{
+  Token t;
+}
+{
+  < PLUS>
+  {
+        jjtThis.value = "+";
+  }
+| < MINUS>
+{
+        jjtThis.value = "-";
+}
+| < MULTIPLY>
+{
+        jjtThis.value = "*";
+}
+| < DIVIDE>
+}
+void f3():
+{}
+{
+  "else" f2()
+}
+void Last_Block():
+{}
+{
+outS()
+ < forloop >
+ {
+   jjtThis.value="FOR";
+ }
+ f4()
+ "endloop"
+}
+void outS():
+{}
+{
+  "outstring(" var("") ");"
+}
+void f4():
+{}
+{
+  alpha() f1() var("") "++" f2()
+}
+void var(String type):
+{
+  Token t;
+  String valueType = null;
+}
+{
+ t = < STR >
+  {
+    if (type.equals("int"))
+      { 
+      jjtThis.value = t.image;
+      jjtThis.setType("int");
+      st.put(("ID" + count++), "int " + t.image);
+    }
+  
+    else if (type.equals("float"))
+    {
+      jjtThis.value = t.image;
+      jjtThis.setType("float");
+      st.put(("ID" + count++), "float " + t.image);
+    }
+    else
+    {
+      jjtThis.value = t.image;
+      valueType = st.checkType(t.image);
+      if (valueType != null)
+      {
+        //System.out.println("Extracted Types::: " + valueType);
+        if (valueType.equals("int"))
+        {
+          jjtThis.setType("int");
+        }
+        else if (valueType.equals("float"))
+        {
+          jjtThis.setType("float");
+        }
+      }
+    }
+  }
+}
+

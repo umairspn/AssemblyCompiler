@@ -1,0 +1,246 @@
+package asd2;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import asd2.SimpleNode;
+
+public class IRGeneration 
+{
+	static int w = 0, w2=0, w3=0;
+	static String right = " ";
+	static String right2 = " ";
+	static String right3 = " ";
+	List<String[]> Instructions=new ArrayList<String[]>();
+	List<String[]> Instructions2=new ArrayList<String[]>();
+	List<String[]> Instructions3=new ArrayList<String[]>();
+
+	public String InterMedCode(SimpleNode tree)
+	{
+		if (tree.children != null) 
+		{
+			for (int i = 0; i < tree.children.length; ++i) 
+			{
+				SimpleNode n = (SimpleNode) tree.children[i];
+				if (n != null) 
+				{
+					InterMedCode(n);
+					if (n.jjtGetValue() != null)
+					{
+						if(n.jjtGetValue().toString().equals("+")||n.jjtGetValue().toString().equals("-")||n.jjtGetValue().toString().equals("*"))
+						{
+							System.out.println(n.parent.jjtGetChild(0).jjtGetValue());		//result
+							System.out.println(n.parent.jjtGetChild(1).jjtGetValue());		//xyz
+							System.out.println(n.jjtGetValue());							//+
+							System.out.println(n.parent.jjtGetChild(3).jjtGetValue());		//abc
+							
+							System.out.println(n.parent.jjtGetValue());
+							
+							right +="\n"+ "t" + w + ": " + n.parent.jjtGetChild(1).jjtGetValue() + "(" +  ")" +  n.jjtGetValue() + n.parent.jjtGetChild(3).jjtGetValue();
+							
+							Instructions.add(new String[] 
+									{   
+									n.jjtGetValue().toString(),
+									n.parent.jjtGetChild(1).jjtGetValue().toString(),
+									n.parent.jjtGetChild(3).jjtGetValue().toString(),
+									"t" + w
+									});
+							w++;
+						}
+						if(n.jjtGetValue().toString().equals("iff"))
+						{
+							System.out.println("\n------IF CONDITION (F1)----");
+							System.out.println(n.jjtGetValue());
+							System.out.println(n.jjtGetChild(0).jjtGetValue());
+							System.out.println(n.jjtGetChild(1).jjtGetValue());
+							System.out.println(n.jjtGetChild(2).jjtGetValue());
+							System.out.println("-----F1 END -----\n");
+							right2 +="\n"+ "u" + w2 + ": " + n.jjtGetChild(0).jjtGetValue() + n.jjtGetChild(1).jjtGetValue() + n.jjtGetChild(2).jjtGetValue();
+
+							
+							Instructions2.add(new String[] 
+									{   
+									n.jjtGetValue().toString(),
+									n.jjtGetChild(0).jjtGetValue().toString(),
+									n.jjtGetChild(1).jjtGetValue().toString(),
+									n.jjtGetChild(2).jjtGetValue().toString()
+									});
+							
+							
+							w2++;
+						}
+						
+						if(n.jjtGetValue().toString().equals("FOR"))
+						{
+							System.out.println("\n------FOR CONDITION (LAST_BLOCK)----");
+
+							System.out.println(n.jjtGetValue());
+							System.out.println(n.jjtGetChild(0).jjtGetChild(0).jjtGetValue());
+							System.out.println(n.jjtGetChild(1).jjtGetChild(0).jjtGetValue());
+							System.out.println(n.jjtGetChild(1).jjtGetChild(0).jjtGetChild(0).jjtGetValue());
+							
+							System.out.println("\n-----FOR END -----\n");
+
+							Instructions3.add(new String[] 
+									{   
+									n.jjtGetValue().toString(),
+									n.jjtGetChild(0).jjtGetChild(0).jjtGetValue().toString(),
+									n.jjtGetChild(1).jjtGetChild(0).jjtGetChild(0).jjtGetValue().toString(),
+									n.jjtGetChild(1).jjtGetChild(0).jjtGetValue().toString()
+									});
+							
+							
+						}
+						
+						
+					}
+				} 
+
+			}
+		
+		}
+		//QR(Instructions);
+		return "\n\n\n------- IR CODE ---------"+ right+ "\n" +right2 + "\n------------------------\n\n";
+		}
+	
+		public void shower()
+		{
+			System.out.println("\n---------------------ASSEMBLY CODE----------------------\n\n");
+			boolean fir=true;
+			System.out.println("INCLUDE Irvine32.inc");
+			System.out.println(".data");
+			
+			for(String[] arr2 :Instructions)
+			{
+				if(fir)
+				{
+					System.out.println(arr2[1] + " DWORD ?");
+					fir=false;
+				}
+				else
+				{
+					System.out.print(arr2[1]);
+					System.out.println(" DWORD ?");
+				}
+			}
+			
+			fir=true;
+			System.out.println("\n.code");
+			System.out.println("main PROC");
+			System.out.println("mov eax,0\n");
+			
+			for(String[] arr :Instructions)
+			{
+				if(fir)
+				{
+					System.out.print("mov eax,");
+					System.out.println(arr[1]);
+					for(String[] arr3 :Instructions2)
+					{
+						if(fir)
+						{
+							System.out.println("cmp eax,"+ arr3[3]);
+							if(arr3[2]==">")
+							{
+								System.out.println("ja L1");
+								System.out.println("jb L2");
+								System.out.println("L1:");
+							}
+							else if(arr3[2]=="<")
+							{
+								System.out.println("jb L1");
+								System.out.println("ja L2");
+								System.out.println("L1:");
+							}
+
+							fir=false;
+						}
+					}
+					
+					fir=false;
+				}
+				
+				if(arr[0]=="+")
+				{
+					System.out.println("add eax,"+arr[2]);
+				}
+				else if(arr[0]=="-")
+				{
+					System.out.println("sub eax,"+arr[2]);
+				}
+				else if(arr[0]=="*")
+				{
+					System.out.println("mul eax,"+arr[2]);
+					System.out.println("mov " +arr[1] + ",eax");
+				}
+				else if(arr[0]=="/")
+				{
+					System.out.println("div eax,"+arr[2]);
+				}
+		//		System.out.println("\n"+arr[0]+"\t\t"+arr[1]+"\t\t"+arr[2]+"\t\t"+arr[3]);
+			}
+			
+			//
+			fir=true;
+			
+			for(String[] arr2 :Instructions3)
+			{
+				
+				if(arr2[0]=="FOR")
+				{
+					if(fir)
+					{
+						fir=false;
+					System.out.println("--FOR---------");
+					System.out.println("mov "+ arr2[2]+ ","+ arr2[3]);
+					
+					fir=true;
+					for(String[] arr4 :Instructions2)
+					{
+						if(fir)
+						{
+							System.out.println("mov ecx,"+ arr4[1]);
+						    System.out.println("loop:");
+						    System.out.println("mov eax,"+arr2[1]);
+						    System.out.println("mul "+ arr2[1]+","+arr2[2]);
+						    System.out.println("mov eax,"+arr2[1]);
+						    System.out.println("call writeint");
+						    System.out.println("add " + arr2[2]+","+1);
+						    System.out.println("end loop");
+						    System.out.println("---FOR END---------");
+							fir=false;
+						}   
+					fir=false;
+					}
+				}
+			}
+				fir=false;
+
+			}
+			
+			fir=false;
+
+			//
+			System.out.println("ret");
+			System.out.println("L2");
+			System.out.println("ret");
+			System.out.println("\ncall writeint");
+			System.out.println("main ENDP");
+			System.out.println("end MAIN");	    
+		}
+	
+		
+		public void shower2()
+		{
+			System.out.println("\n\n\n IF CONDITIONS \n");
+			boolean fir=true;
+			for(String[] arr2 :Instructions2)
+			{
+				if(fir)
+				{
+					//System.out.println("\n"+arr2[0]+"\t"+arr2[1]+"\t"+arr2[2]+"\t"+arr2[3]);
+					//System.out.println("\n"+arr2[0] + "  "+arr2[1] + "  " + arr2[2]+ " " +arr2[3]);
+				}
+			}	
+		}	
+	}

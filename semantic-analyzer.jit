@@ -1,0 +1,60 @@
+package asd2;
+
+//import asd2.SimpleNode;
+
+public class SemanticAnalyzer 
+{
+	static int cc=0;
+	public void typeChecking(SimpleNode tree) 
+	{
+		int w = 0;
+		String a, b, c;
+		String current = null;
+		if (tree.children != null) 
+		{
+			for (int i = 0; i<tree.children.length; ++i)  
+			{
+			typeChecking((SimpleNode) tree.children[i]);
+			if (tree.children[i].toString().equals("f2")) 
+			{
+				String aaa,bbb,ccc,ddd;
+				aaa=tree.children[i].jjtGetChild(0).getType();
+				bbb=tree.children[i].jjtGetChild(1).getType();
+				ddd=tree.children[i].jjtGetChild(3).getType();
+				cc++;
+				System.out.println("\n -----SEMANTIC LINE-----  " + cc + "\n");
+				
+				System.out.println(aaa);
+				System.out.println(bbb);
+				System.out.println(ddd);
+				if(aaa==bbb && aaa==ddd)
+				{
+					System.out.println("SUCCESSFULL");
+				}
+				else
+				{
+					System.out.println("NOT SUCCESSFULL");
+				}
+			}
+
+			else if (tree.children[i].toString().equals("alpha")) 
+			{
+				System.out.println(tree.children[i].jjtGetValue());	
+			}
+			if (tree.children[i].toString().equals("alpha")) 
+			{ 
+				String aa,bb,cc,dd;
+				aa=tree.children[i].jjtGetChild(0).getType();
+				bb=tree.children[i+1].jjtGetChild(0).getType();
+				cc=tree.children[i+2].jjtGetChild(0).getType();
+				dd=tree.children[i+3].jjtGetChild(0).getType();
+				System.out.println(aa);
+				System.out.println(bb);
+				System.out.println(cc);
+				System.out.println(dd);				
+			}
+			*/
+		 	}
+	}
+  }
+}
